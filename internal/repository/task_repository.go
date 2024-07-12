@@ -39,11 +39,28 @@ func (r *taskRepository) CreateTask(task *models.Task) error {
 
 func (r *taskRepository) GetTaskByID(id int) (*models.Task, error) {
 	query := `SELECT id, title, description, status, created_at, updated_at FROM tasks WHERE id = ?`
+	row := r.db.QueryRow(query, id)
+
 	task := &models.Task{}
-	err := r.db.QueryRow(query, id).Scan(&task.ID, &task.Title, &task.Description, &task.Status, &task.CreatedAt, &task.UpdatedAt)
+	var createdAt, updatedAt []uint8
+	err := row.Scan(&task.ID, &task.Title, &task.Description, &task.Status, &createdAt, &updatedAt)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("task not found")
+		}
+		return nil, fmt.Errorf("error scanning row: %v", err)
 	}
+	
+	// Parse the timestamps
+	task.CreatedAt, err = time.Parse("2006-01-02 15:04:05", string(createdAt))
+	if err != nil {
+		return nil, fmt.Errorf("error parsing created_at: %v", err)
+	}
+	task.UpdatedAt, err = time.Parse("2006-01-02 15:04:05", string(updatedAt))
+	if err != nil {
+		return nil, fmt.Errorf("error parsing updated_at: %v", err)
+	}
+
 	return task, nil
 }
 

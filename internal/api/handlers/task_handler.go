@@ -34,7 +34,8 @@ func (h *TaskHandler) CreateTask(c *gin.Context) {
 }
 
 func (h *TaskHandler) GetTaskByID(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
 		return
@@ -42,7 +43,11 @@ func (h *TaskHandler) GetTaskByID(c *gin.Context) {
 
 	task, err := h.taskService.GetTaskByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
+		if err.Error() == "task not found" {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch task"})
+		}
 		return
 	}
 
