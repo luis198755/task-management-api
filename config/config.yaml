@@ -1,0 +1,43 @@
+# Server Configuration
+server:
+  addr: ":8080"
+  read_timeout: 10s
+  write_timeout: 10s
+  idle_timeout: 15s
+
+# Database Configuration
+database:
+  driver: "mysql"
+  url: "user:password@tcp(localhost:3306)/task_management"
+  max_open_conns: 25
+  max_idle_conns: 25
+  conn_max_lifetime: 5m
+
+# Logging Configuration
+log:
+  level: "info"
+  format: "json"
+
+# API Configuration
+api:
+  version: "v1"
+  rate_limit:
+    requests: 100
+    duration: 1m
+
+# CORS Configuration
+cors:
+  allowed_origins:
+    - "http://localhost:3000"
+    - "http://localhost:8080"
+  allowed_methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+  allowed_headers:
+    - "Origin"
+    - "Content-Type"
+    - "Accept"
+    - "Authorization"
+  max_age: 300s
