@@ -122,6 +122,19 @@ func (r *taskRepository) UpdateTask(task *models.Task) error {
 
 func (r *taskRepository) DeleteTask(id int) error {
 	query := `DELETE FROM tasks WHERE id = ?`
-	_, err := r.db.Exec(query, id)
-	return err
+	result, err := r.db.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("error deleting task: %v", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("error getting rows affected: %v", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("task not found")
+	}
+
+	return nil
 }
