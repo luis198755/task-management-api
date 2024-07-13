@@ -17,6 +17,7 @@ import (
 	"task-management-api/internal/repository"
 	"task-management-api/internal/service"
 	"task-management-api/pkg/database"
+	"task-management-api/internal/api/middleware"
 )
 
 func main() {
@@ -54,6 +55,7 @@ func main() {
 
 	// Set up Gin router
 	router := gin.Default()
+	router.Use(middleware.Logger())
 
 	// Set up CORS
 	corsConfig := cors.DefaultConfig()

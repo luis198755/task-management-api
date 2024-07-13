@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"task-management-api/internal/models"
 	"task-management-api/internal/service"
+	"task-management-api/internal/errors"
 )
 
 type TaskHandler struct {
@@ -37,16 +38,16 @@ func (h *TaskHandler) GetTaskByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("Invalid task ID"))
 		return
 	}
 
 	task, err := h.taskService.GetTaskByID(id)
 	if err != nil {
-		if err.Error() == "task not found" {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
+		if apiErr, ok := err.(*errors.APIError); ok {
+			c.JSON(apiErr.StatusCode, apiErr)
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch task"})
+			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError("Failed to fetch task"))
 		}
 		return
 	}

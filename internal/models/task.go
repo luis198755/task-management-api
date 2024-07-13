@@ -12,9 +12,9 @@ const (
 
 type Task struct {
 	ID          int        `json:"id"`
-	Title       string     `json:"title"`
-	Description string     `json:"description"`
-	Status      TaskStatus `json:"status"`
+	Title       string     `json:"title" binding:"required,min=1,max=100"`
+	Description string     `json:"description" binding:"max=500"`
+	Status      TaskStatus `json:"status" binding:"required,oneof=TODO IN_PROGRESS DONE"`
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
 }
