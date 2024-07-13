@@ -71,7 +71,8 @@ func (h *TaskHandler) GetAllTasks(c *gin.Context) {
 }
 
 func (h *TaskHandler) UpdateTask(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task ID"})
 		return
@@ -79,17 +80,23 @@ func (h *TaskHandler) UpdateTask(c *gin.Context) {
 
 	var task models.Task
 	if err := c.ShouldBindJSON(&task); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid task data"})
 		return
 	}
+
 	task.ID = id
 
-	if err := h.taskService.UpdateTask(&task); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update task"})
+	err = h.taskService.UpdateTask(&task)
+	if err != nil {
+		if err.Error() == "task not found" {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update task"})
+		}
 		return
 	}
 
-	c.JSON(http.StatusOK, task)
+	c.JSON(http.StatusOK, gin.H{"message": "Task updated successfully"})
 }
 
 func (h *TaskHandler) DeleteTask(c *gin.Context) {

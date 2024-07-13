@@ -103,8 +103,21 @@ func (r *taskRepository) GetAllTasks() ([]*models.Task, error) {
 
 func (r *taskRepository) UpdateTask(task *models.Task) error {
 	query := `UPDATE tasks SET title = ?, description = ?, status = ? WHERE id = ?`
-	_, err := r.db.Exec(query, task.Title, task.Description, task.Status, task.ID)
-	return err
+	result, err := r.db.Exec(query, task.Title, task.Description, task.Status, task.ID)
+	if err != nil {
+		return fmt.Errorf("error updating task: %v", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("error getting rows affected: %v", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("task not found")
+	}
+
+	return nil
 }
 
 func (r *taskRepository) DeleteTask(id int) error {
